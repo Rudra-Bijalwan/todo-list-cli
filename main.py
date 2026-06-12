@@ -1,5 +1,13 @@
 # DONE apart from exception handling 
 import pickle
+from pathlib import Path
+
+# make directory to store app data
+APP_DIR = Path.home() / "ToDoListApp"
+DATA_DIR = APP_DIR / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+TO_DO_LIST = DATA_DIR / "todolist.dat"
 
 # Function for the user to input the tasks to create a todo list and store it in a binary file
 def set_tasks():
@@ -15,7 +23,7 @@ def set_tasks():
             more = input("Add more tasks?[y/n]: ")
         print()
     
-    with open("todolist.dat", "wb") as f:
+    with open(TO_DO_LIST, "wb") as f:
         pickle.dump(todo, f)
     
     # Displays the tasks in neat formatting
@@ -25,7 +33,7 @@ def set_tasks():
 # Displays the tasks along with their status
 def show_tasks():
     try:
-        with open("todolist.dat", "rb") as f:
+        with open(TO_DO_LIST, "rb") as f:
             todo = pickle.load(f)
     except FileNotFoundError:
         print("Yet to be set!\n")
@@ -42,7 +50,7 @@ def show_tasks():
 # Function to ask the user to update the status of a task
 def update_task_status():
     try:
-        with open("todolist.dat", "rb") as f:
+        with open(TO_DO_LIST, "rb") as f:
             todo = pickle.load(f)
     except FileNotFoundError:
         print("Your to do list is empty!\n")
@@ -65,7 +73,7 @@ def update_task_status():
             print(f"Please enter a valid status for your task - {key}")
         print()
     
-    with open("todolist.dat", "wb") as f:
+    with open(TO_DO_LIST, "wb") as f:
         pickle.dump(todo, f)
 
     print(f"Your updated to do list is: ")
@@ -76,7 +84,7 @@ def update_task_status():
 
 def remove_task():
     try:
-        with open("todolist.dat", "rb") as f:
+        with open(TO_DO_LIST, "rb") as f:
             todo = pickle.load(f)
     except FileNotFoundError:
         print("Your to do list is empty!\n")
@@ -97,7 +105,7 @@ def remove_task():
         if n in range(1, (len(tasks)+1)):
             task = tasks[n-1]
             del todo[task]
-            with open("todolist.dat", "wb") as f:
+            with open(TO_DO_LIST, "wb") as f:
                 pickle.dump(todo, f)
             print("Task removed successfully!")
         else:
@@ -109,7 +117,7 @@ def remove_task():
 
 def add_task():
     try:
-        with open("todolist.dat", "rb") as f:
+        with open(TO_DO_LIST, "rb") as f:
             todo = pickle.load(f)
     except FileNotFoundError:
         print("Please create a to do list first!\n")
@@ -117,7 +125,7 @@ def add_task():
     
     task = input("Enter new task: ")
     todo[task] = "Pending"
-    with open("todolist.dat", "wb") as f:
+    with open(TO_DO_LIST, "wb") as f:
         pickle.dump(todo, f)
     
     print("Today's updated tasks are: ")
@@ -130,7 +138,7 @@ def add_task():
 
 def change_task():
     try:
-        with open("todolist.dat", "rb") as f:
+        with open(TO_DO_LIST, "rb") as f:
             todo = pickle.load(f)
     except FileNotFoundError:
         print("Please create a to do list first!\n")
@@ -154,7 +162,7 @@ def change_task():
             else:
                 todo_new[task] = "Pending"
 
-        with open("todolist.dat", "wb") as f:
+        with open(TO_DO_LIST, "wb") as f:
             pickle.dump(todo_new, f)
         print("Task updated successfully!")
     except Exception:
