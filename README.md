@@ -10,7 +10,7 @@ A terminal-based To-Do List application built using Python.
 * Add new tasks
 * Remove existing tasks
 * Modify existing tasks
-* Persistent task storage using Python's pickle module
+* Persistent task storage using Python's json module
 
 ## Concepts Used
 
@@ -19,7 +19,7 @@ A terminal-based To-Do List application built using Python.
 * File Handling
 * Exception Handling
 * Loops and Conditionals
-* Data Persistence with Pickle
+* Data Persistence with JSON
 
 ## How to Run
 
@@ -31,4 +31,3 @@ python main.py
 
 * Better input validation and error handling
 * Due dates and priorities
-* JSON instead of pickle
