@@ -124,6 +124,7 @@ def add_task():
         return
     
     task = input("Enter new task: ")
+    print()
     todo[task] = "Pending"
     with open(TO_DO_LIST, "w") as f:
         json.dump(todo, f)
@@ -132,7 +133,8 @@ def add_task():
     i = 1
     for key in todo:
         print(f"{i}. {key} -> Status: {todo[key]}")
-        i = i+1  
+        i = i+1
+    print()
 
     
 
@@ -150,7 +152,12 @@ def change_task():
         print(f"{i+1}. {tasks[i]}")
     
     n = int(input("To update a task enter it's index no. : "))
+    if n not in (1,len(tasks)):
+        print("Please enter a valid index!")
+        print()
+        return
     new_task = input("Enter the new task: ")
+    print()
 
     try:
         tasks.remove(tasks[n-1])
