@@ -29,5 +29,4 @@ python main.py
 
 ## Future Improvements
 
-* Better input validation and error handling
 * Due dates and priorities
