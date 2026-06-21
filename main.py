@@ -9,171 +9,165 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 TO_DO_LIST = DATA_DIR / "todolist.json"
 
+# load contents of the to do list json file
+def load_file():
+    if not TO_DO_LIST.exists():
+        return []
+    
+    with open(TO_DO_LIST, 'r') as f:
+        return json.load(f)
+    
+# save the todo list
+def save_file(todo_list: list):
+    with open(TO_DO_LIST, 'w') as f:
+        json.dump(todo_list, f, indent=2)
+
 # Function for the user to input the tasks to create a todo list and store it in a binary file
 def set_tasks():
-    todo = {}
+    todo_list = []
     more = "y"
     while more.lower() == "y":
         task = input("Enter today's tasks to be added in to do list: ")
-        todo[task] = "Pending"
+        task_data = {}
+        task_data["task"] = task
+        task_data["status"] = "Pending"
+        todo_list.append(task_data)
+
         more = input("Add more tasks?[y/n]: ")
         # To ensure that the user enters a valid input for more tasks
         while more.lower() not in ("y", "n"):
             print("Please enter a valid input!\n")
             more = input("Add more tasks?[y/n]: ")
         print()
-    
-    with open(TO_DO_LIST, "w") as f:
-        json.dump(todo, f)
-    
+
+    save_file(todo_list)
+
     # Displays the tasks in neat formatting
     print("Today's tasks are: ")
     show_tasks()
 
 # Displays the tasks along with their status
 def show_tasks():
-    try:
-        with open(TO_DO_LIST, "r") as f:
-            todo = json.load(f)
-    except FileNotFoundError:
-        print("Yet to be set!\n")
+    todo_list = load_file()
+
+    if todo_list == []:
+        print("Tasks are yet to be set!\n")
         return
-    if todo == {}:
-        print("Yet to be set!\n")
-        return
+    
     i = 1
-    for key in todo:
-        print(f"{i}. {key} -> Status: {todo[key]}")
+    for task_data in todo_list:
+        print(f"{i}. {task_data["task"]} -> Status: {task_data["status"]}")
         i = i+1 
     print()
 
 # Function to ask the user to update the status of a task
 def update_task_status():
-    try:
-        with open(TO_DO_LIST, "r") as f:
-            todo = json.load(f)
-    except FileNotFoundError:
-        print("Your to do list is empty!\n")
-        return
+    todo_list = load_file()
     
-    if todo == {}:
+    if todo_list == []:
         print("Your to do list is empty!\n")
         return
     
     print("The current status of today's tasks is: ")
     show_tasks()
 
-    for key in todo:
-        update = input(f"Enter the status of the task - {key} [Done/Pending]: ")
+    more = 'y'
+    while more.lower() == 'y':
+        try:
+            n = int(input("Enter the index number of the task whose status is to be changed: "))
+            if n not in range(1,len(todo_list)+1):
+                print("Please enter a valid index!\n")
+                return
+        except ValueError:
+            print("Please enter a valid index!\n")
+            return
+        index = n - 1
+
+        update = input(f"Enter the status of the task - {todo_list[index]["task"]} [Done/Pending]: ")
         if update.lower() == "done":
-            todo[key] = "Done"
+            todo_list[index]["status"] = "Done"
         elif update.lower() == "pending":
-            todo[key] = "Pending"
+            todo_list[index]["status"] = "Pending"
         else:
-            print(f"Please enter a valid status for your task - {key}")
+            print(f"Please enter a valid status for your task - {todo_list[index]["task"]}\n")
+            return
         print()
-    
-    with open(TO_DO_LIST, "w") as f:
-        json.dump(todo, f)
+        
+        save_file(todo_list)
+        print("Task status updated.\n")
+
+        while True:
+            more = input("Update more tasks? [y/n] ")
+
+            if more.lower() not in ('y', 'n'):
+                print("Please enter a valid answer [y/n]!\n")
+            else:
+                break
+        print()
 
     print(f"Your updated to do list is: ")
     show_tasks() 
 
-# give options to remove existing tasks, add new tasks, and change existing ones
-# Below three functions are intended for the same
-
+# remove existing tasks
 def remove_task():
-    try:
-        with open(TO_DO_LIST, "r") as f:
-            todo = json.load(f)
-    except FileNotFoundError:
+    todo_list = load_file()
+
+    if todo_list == []:
         print("Your to do list is empty!\n")
         return
-    if todo == {}:
-        print("Your to do list is empty!\n")
-        return
-    
-    tasks = list(todo.keys())
     
     print(f"Your current tasks are: ")
-    for i in range(len(tasks)):
-        print(f"{i+1}. {tasks[i]}")
+    for i in range(len(todo_list)):
+        print(f"{i+1}. {todo_list[i]["task"]}")
     
-    n = int(input("To remove a task enter it's index no. : "))
+    index = int(input("To remove a task enter it's index no. : "))
     print()
-    try:
-        if n in range(1, (len(tasks)+1)):
-            task = tasks[n-1]
-            del todo[task]
-            with open(TO_DO_LIST, "w") as f:
-                json.dump(todo, f)
-            print("Task removed successfully!")
-        else:
-            print("Please enter a valid index!")
-    except Exception:
-        print("Error!")
-    print()
-    
+        
+    if index in range(1, (len(todo_list)+1)):
+        del todo_list[index-1]
 
+        save_file(todo_list)
+        print("Task removed successfully!")
+    else:
+        print("Please enter a valid index!")
+
+    print()
+    
+# add new tasks to existing to do list
 def add_task():
-    try:
-        with open(TO_DO_LIST, "r") as f:
-            todo = json.load(f)
-    except FileNotFoundError:
-        print("Please create a to do list first!\n")
-        return
+    todo_list = load_file()
     
     task = input("Enter new task: ")
     print()
-    todo[task] = "Pending"
-    with open(TO_DO_LIST, "w") as f:
-        json.dump(todo, f)
-    
-    print("Today's updated tasks are: ")
-    i = 1
-    for key in todo:
-        print(f"{i}. {key} -> Status: {todo[key]}")
-        i = i+1
-    print()
 
-    
+    task_data = {"task": task, "status": "Pending"}
+    todo_list.append(task_data)
 
+    save_file(todo_list)
+    print("Task added.\n")
+
+# change existing task
 def change_task():
-    try:
-        with open(TO_DO_LIST, "r") as f:
-            todo = json.load(f)
-    except FileNotFoundError:
-        print("Please create a to do list first!\n")
-        return
-    tasks = list(todo.keys())
+    todo_list = load_file()
     
     print(f"Your current tasks are: ")
-    for i in range(len(tasks)):
-        print(f"{i+1}. {tasks[i]}")
+    for i in range(len(todo_list)):
+        print(f"{i+1}. {todo_list[i]["task"]}")
     
-    n = int(input("To update a task enter it's index no. : "))
-    if n not in (1,len(tasks)):
+    index = int(input("To update a task enter it's index no. : "))
+    if index not in range(1,len(todo_list)+1):
         print("Please enter a valid index!")
         print()
         return
+    
     new_task = input("Enter the new task: ")
     print()
 
-    try:
-        tasks.remove(tasks[n-1])
-        tasks.insert(n-1, new_task)
-        todo_new = {}
-        for task in tasks:
-            if task in todo:
-                todo_new[task] = todo[task]
-            else:
-                todo_new[task] = "Pending"
+    new_task_data = {"task": new_task, "status": "Pending"}
+    todo_list[index-1] = new_task_data
 
-        with open(TO_DO_LIST, "w") as f:
-            json.dump(todo_new, f)
-        print("Task updated successfully!")
-    except Exception:
-        print("Error!")
+    save_file(todo_list)
+    print("Task updated successfully!")
 
 
 if __name__ == "__main__":
