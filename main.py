@@ -1,9 +1,7 @@
-# some good additions to make:
-# make the data structure to store tasks in only tasks.json file, and it has tasks for all the dates.
-# make the program get meaningful insights from all tasks data
 import json
 from datetime import date
 from pathlib import Path
+
 
 # make directory to store app data
 APP_DIR = Path.home() / "ToDoListApp"
@@ -11,6 +9,7 @@ DATA_DIR = APP_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 ALL_TASKS = DATA_DIR / "tasks.json"
+
 
 # load contents of the to do list json file
 def load_file(file: Path):
@@ -20,13 +19,15 @@ def load_file(file: Path):
     with open(file, 'r') as f:
         return json.load(f)
     
+
 # save the todo list
 def save_file(all_tasks: list, file: Path):
     with open(file, 'w') as f:
         json.dump(all_tasks, f, indent=2)
 
+
 # Function for the user to input the tasks for the current date and store it in a json file
-def set_tasks():
+def set_tasks(all_tasks, current_date):
 
     more = "y"
     # if user wants to add more tasks
@@ -37,7 +38,7 @@ def set_tasks():
         task_data["status"] = "Pending"
         task_data["date"] = current_date
 
-        task_file.append(task_data)
+        all_tasks.append(task_data)
 
         more = input("Add more tasks?[y/n]: ")
         # To ensure that the user enters a valid input for more tasks
@@ -46,11 +47,12 @@ def set_tasks():
             more = input("Add more tasks?[y/n]: ")
         print()
 
-    save_file(task_file, ALL_TASKS)
+    save_file(all_tasks, ALL_TASKS)
     print("Tasks saved!\n")
 
+
 # Displays the tasks along with their status
-def show_tasks():
+def show_tasks(today_tasks):
     
     # if todays tasks not set
     if today_tasks == []:
@@ -63,15 +65,16 @@ def show_tasks():
         i = i+1 
     print()
 
+
 # Function to ask the user to update the status of a task
-def update_task_status():
+def update_task_status(today_tasks, all_tasks):
     
     if today_tasks == []:
         print("Your to do list is empty!\n")
         return
     
     print("The current status of today's tasks is: ")
-    show_tasks()
+    show_tasks(today_tasks)
 
     more = 'y'
     while more.lower() == 'y':
@@ -95,7 +98,7 @@ def update_task_status():
             return
         print()
         
-        save_file(task_file, ALL_TASKS)
+        save_file(all_tasks, ALL_TASKS)
         print("Task status updated.\n")
 
         while True:
@@ -108,10 +111,11 @@ def update_task_status():
         print()
 
     print(f"Your updated to do list is: ")
-    show_tasks() 
+    show_tasks(all_tasks) 
+
 
 # remove existing tasks
-def remove_task():
+def remove_task(today_tasks, all_tasks):
 
     if today_tasks == []:
         print("Your to do list is empty!\n")
@@ -127,8 +131,8 @@ def remove_task():
         
     if index in range(len(today_tasks)):
         # remove the task
-        task_file.remove(today_tasks[index])
-        save_file(task_file, ALL_TASKS)
+        all_tasks.remove(today_tasks[index])
+        save_file(all_tasks, ALL_TASKS)
 
         print("Task removed successfully!")
     else:
@@ -136,8 +140,9 @@ def remove_task():
 
     print()
 
+
 # change existing task
-def change_task():
+def change_task(today_tasks, all_tasks):
     
     print(f"Your current tasks are: ")
     for i in range(len(today_tasks)):
@@ -156,20 +161,21 @@ def change_task():
 
     today_tasks[index]["task"] = new_task
     
-    save_file(task_file, ALL_TASKS)
+    save_file(all_tasks, ALL_TASKS)
     print("Task updated successfully!\n")
 
-if __name__ == "__main__":
 
+# main function
+def main():
     print("Hello, user! Enter the indices as per the below instructions to use the app: \n")
     while True:
         # store current date
         current_date = date.today().strftime("%d/%m/%Y")
-        task_file = load_file(ALL_TASKS)
+        all_tasks = load_file(ALL_TASKS)
 
         # store today's to do list
         today_tasks = [tasks 
-                   for tasks in task_file
+                   for tasks in all_tasks
                    if tasks["date"] == current_date]
         
         # To ask the user to select and execute one of the options
@@ -183,16 +189,16 @@ if __name__ == "__main__":
             print()
 
             if n == 1:
-                set_tasks()
+                set_tasks(all_tasks, current_date)
             elif n == 2:
                 print("Today's tasks are:\n")
-                show_tasks()
+                show_tasks(today_tasks)
             elif n == 3:
-                update_task_status()
+                update_task_status(today_tasks, all_tasks)
             elif n == 4:
-                remove_task()
+                remove_task(today_tasks, all_tasks)
             elif n == 5:
-                change_task()
+                change_task(today_tasks, all_tasks)
             elif n == 6:
                 break
             # To ensure that the user enters a valid input for selecting an option
@@ -201,3 +207,7 @@ if __name__ == "__main__":
         
         except ValueError:
             print("Please enter an integer from the given options!\n")
+
+
+if __name__ == "__main__":
+    main()
